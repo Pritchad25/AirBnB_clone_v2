@@ -1,40 +1,53 @@
 #!/usr/bin/env bash
-# Bash script that sets up your web servers for the deployment of web_static
-# run script on both web servers.
-# checks if Nginx is not installed or not executable
+#This Bash script sets up web servers for the deployment of the web static
 
+if ! command -v nginx &>/dev/null;
+then
+	sudo apt-get update
+	sudo apt-get install -y nginx
+fi
 
-sudo apt update
-sudo apt install nginx
-sudo service nginx start
-
-  # Create necessary folders
 sudo mkdir -p /data/web_static/releases/test/
-sudo mkdir -p /data/web_static/shared/
+sudo mkdir -p /data/web_static/shared
+
+echo "<html>
+	<head>
+	</head>
+	<body>
+		Holberton School
+	</body>
+	</html>" | sudo tee /data/web_static/releases/test/index.html
+
+sudo rm -f /data/web_static/current
+ln -s /data/web_static/releases/test/ /data/web_static/current
 
 sudo chown -R ubuntu:ubuntu /data/
 
-echo "Holberton School" > /data/web_static/releases/test/index.html
+echo "Hello World!" | sudo tee /var/www/html/index.html
 
-# Create a symbolic link /data/web_static/current linked to the /data/web_static/releases/test/ folder
-sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
+REDIRECTION=$(cat << EOF
 
-# Update Nginx configuration to serve /data/web_static/current/ at /hbnb_static
-echo "server {
-    listen 80;
-    server_name example.com ;
-	 root /var/www/html;
-    index  index.html index.htm;
+	add_header X-Served-By $(hostname);
 
-    location /hbnb_static {
-        alias /data/web_static/current;
-		index.html;
-    }
-    location / {
-        # Your other configuration directives, if any
-    }
-}" > /etc/nginx/sites-available/default
+	location /redirect_me {
+		return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
+	}
 
-# sudo nginx -t
+	location /hbnb_static/ {
+		alias /data/web_static/current/;
+		index index.html;
+	}
+
+	error_page 404 /custom_404.html;
+
+	location /custom_404.html {
+		root /var/www/html;
+	}
+EOF
+)
+
+sudo sed -i '/^server {/r /dev/stdin' /etc/nginx/sites-enabled/default <<< "$REDIRECTION"
+
+echo "Ceci n'est pas une page" | sudo tee /var/www/html/custom_404.html
+
 sudo service nginx restart
-
