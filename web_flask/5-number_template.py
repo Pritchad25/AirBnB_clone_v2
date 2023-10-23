@@ -5,7 +5,7 @@
     of the text variable\
         (replace underscore _ symbols with a space )
 """
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
