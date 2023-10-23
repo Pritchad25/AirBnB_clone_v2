@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """ This Python script starts a Flask web application:
-listening on 0.0.0.0, port 5000 Routes /: display “Hello HBNB!”
+listening on 0.0.0.0, port 5000 Routes
 """
 from flask import Flask
 
