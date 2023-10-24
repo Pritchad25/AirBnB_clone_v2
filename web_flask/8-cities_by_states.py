@@ -9,24 +9,15 @@ from models.state import State
 
 app = Flask(__name__)
 
-
-@app.route('/', strict_slashes=False)
-def home():
-    """
-	The home route of our AirBnB application.
-    """
-    return "Hello HBNB!"
-
-
-@app.route("/cities_by_states", strict_slashes=False)
+@app.route('/cities_by_states', strict_slashes=False)
 def cities_by_states():
     """This function displays cities per state"""
-    states = storage.all(State).values()
-    return render_template("8-cities_by_states.html", states=states)
+    states = storage.all("State").values()
+    return render_template('8-cities_by_states.html', states=states)
 
 
 @app.teardown_appcontext
-def teardown_context(ctx):
+def teardown_db(exception):
     """This function displays cities per state"""
     storage.close()
 
